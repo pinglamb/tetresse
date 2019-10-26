@@ -135,7 +135,7 @@ class Game {
     constructor(args) {
         if (args == null || args.length == 0) error("Invalid arguments for board constructor: " + args);
         if (args[0] == null) error("Board element cannot be null in constructor parameter");
-        
+
         this.element = args[0];
         this.name = "tetresse";
 
@@ -211,7 +211,7 @@ class Game {
             s.clock.resume();
         });
         this.stats.addStatsListener("addRecord", function(s) {
-            
+
         });
         this.stats.addStatsListener("startGame", function(s) {
             s.startTime.updateValue(new Date().getTime());
@@ -334,7 +334,7 @@ class Game {
             s.linesCleared.total.update("ps");
             for (var i = 0; i < 4; i++)
                 s.linesCleared.count[i].update("ps");
-            
+
             var str = "ijlstz";
             for (var j = 0; j < str.length; j++) {
                 s.spins[str.charAt(j)].total.update("ps");
@@ -690,7 +690,7 @@ class Game {
                     }
                 ]
             });
-            
+
             // question
             var question = addChild(menu, menu.id + "-question", "div");
             question.classList.add(this.name + "-menu-content");
@@ -807,7 +807,7 @@ class Game {
         this.record.moves.push(m);
         this.stats.executeStatsListeners("addRecord");
     }
-        
+
     recordSetNextPieces(arr) {
         this.record.nextPieces = [];
         for (var i = 0; i < arr.length; i++)
@@ -820,7 +820,7 @@ class Game {
         var gameID = this.element.id;
         var menu = document.getElementById(gameID + "-menu");
         var title = document.getElementById(gameID + "-menu-title-text");
-        
+
         this.menu.stats.hide();
         for (var i = 1; i < menu.children.length; i++) {
             menu.children[i].style.display = "none";
@@ -868,10 +868,18 @@ class Game {
         this.swapped = false;
         this.gravNum = 0;
         this.pieceMoveTimeout = {"right": null, "left": null};
-        
+
         this.boolKeys = {right:{down: false}, left: {down: false}, sd: {down: false}};
         this.nextPieces = [];
         this.heldLocations = {"i":[[37.5,0], [37.5, 25], [37.5, 50], [37.5, 75]], "j":[[25,12.5],[50,12.5],[50,37.5],[50,62.5]], "l":[[25,62.5],[50,12.5],[50,37.5],[50,62.5]], "o":[[25,25],[25,50],[50,25],[50,50]], "s":[[25,37.5],[25,62.5],[50,12.5],[50,37.5]], "t":[[25,37.5],[50,12.5],[50,37.5],[50,62.5]], "z":[[25,12.5],[25,37.5],[50,37.5],[50,62.5]]};
+
+        var gamepad = new Gamepad();
+        gamepad.on('connect', e => {
+          console.log(`controller ${e.index} connected!`);
+        });
+        gamepad.on('disconnect', e => {
+          console.log(`controller ${e.index} disconnected!`);
+        });
 
         this.listeners = [];
         var setListeners = function() {
@@ -881,7 +889,7 @@ class Game {
                     b = games[i];
                     break;
                 }
-            
+
             if (b.gameOver)
                 return;
             if (!b.settings.playable) {
@@ -901,15 +909,20 @@ class Game {
                 e = e || window.event;
 
                 var b = null;
-                for (var i = 0; i < games.length; i++)
-                    if (this.parentNode.parentNode === games[i].element) {
-                        b = games[i];
-                    }
+                if (this && this.parentNode) {
+                  for (var i = 0; i < games.length; i++)
+                      if (this.parentNode.parentNode === games[i].element) {
+                          b = games[i];
+                      }
+                } else {
+                  b = games[0];
+                }
 
                 // TODO this shouldn't need to be here (when gameover)
                 if (b.gameOver)
                     return;
 
+                console.log(e.keyCode)
                 if (b.settings.keyCodes[e.keyCode] == "right") {
                     if (b.boolKeys.right.down)
                         return;
@@ -1012,6 +1025,127 @@ class Game {
             b.listeners.push(keypress);
             addEvent(this, "keyup", keyrelease);
             addEvent(this, "keydown", keypress);
+
+            var codes = {
+              t: 84, // Left
+              y: 89, // Right
+              g: 71, // SD
+              h: 72, // HD
+              u: 85, // CCW
+              i: 73, // CW
+              o: 79, // Hold
+            }
+
+            gamepad.on('press', 'button_1', () => {
+              console.log('X was pressed!');
+              keypress({
+                keyCode: codes.u
+              });
+            });
+            gamepad.on('press', 'button_2', () => {
+              console.log('Circle was pressed!');
+              keypress({
+                keyCode: codes.i
+              });
+            });
+            gamepad.on('press', 'button_3', () => {
+              console.log('Square was pressed!');
+            });
+            gamepad.on('press', 'button_4', () => {
+              console.log('Triangle was pressed!');
+            });
+            gamepad.on('release', 'button_1', () => {
+              console.log('X was released!');
+              keyrelease({
+                keyCode: codes.u
+              });
+            });
+            gamepad.on('release', 'button_2', () => {
+              console.log('Circle was released!');
+              keyrelease({
+                keyCode: codes.i
+              });
+            });
+            gamepad.on('release', 'button_3', () => {
+              console.log('Square was released!');
+            });
+            gamepad.on('release', 'button_4', () => {
+              console.log('Triangle was released!');
+            });
+
+            gamepad.on('press', 'd_pad_up', () => {
+              console.log('button up was pressed!');
+              keypress({
+                keyCode: codes.h
+              });
+            });
+            gamepad.on('press', 'd_pad_down', () => {
+              console.log('button down was pressed!');
+              keypress({
+                keyCode: codes.g
+              });
+            });
+            gamepad.on('press', 'd_pad_left', () => {
+              console.log('button left was pressed!');
+              keypress({
+                keyCode: codes.t
+              });
+            });
+            gamepad.on('press', 'd_pad_right', () => {
+              console.log('button right was pressed!');
+              keypress({
+                keyCode: codes.y
+              });
+            });
+            gamepad.on('release', 'd_pad_up', () => {
+              console.log('button up was released!');
+              keyrelease({
+                keyCode: codes.h
+              });
+            });
+            gamepad.on('release', 'd_pad_down', () => {
+              console.log('button down was released!');
+              keyrelease({
+                keyCode: codes.g
+              });
+            });
+            gamepad.on('release', 'd_pad_left', () => {
+              console.log('button left was released!');
+              keyrelease({
+                keyCode: codes.t
+              });
+            });
+            gamepad.on('release', 'd_pad_right', () => {
+              console.log('button right was released!');
+              keyrelease({
+                keyCode: codes.y
+              });
+            });
+
+            gamepad.on('press', 'shoulder_top_left', () => {
+              console.log('L1 was pressed!');
+              keypress({
+                keyCode: codes.o
+              });
+            });
+            gamepad.on('press', 'shoulder_bottom_left', () => {
+              console.log('L2 was pressed!');
+              keypress({
+                keyCode: codes.o
+              });
+            });
+            gamepad.on('press', 'shoulder_top_right', () => {
+              console.log('R1 was pressed!');
+              keypress({
+                keyCode: codes.o
+              });
+            });
+            gamepad.on('press', 'shoulder_bottom_right', () => {
+              console.log('R2 was pressed!');
+              keypress({
+                keyCode: codes.o
+              });
+            });
         };
         var unsetListeners = function() {
             var b = null;
@@ -1030,9 +1164,14 @@ class Game {
             while(b.listeners.length != 0) {
                 this.removeEventListener("keydown", b.listeners.splice(0,1)[0]);
             }
+
+            gamepad.off(['press', 'release'], ['button_1', 'button_2', 'button_3', 'button_4'])
+            gamepad.off(['press', 'release'], ['shoulder_top_left', 'shoulder_top_right', 'shoulder_bottom_left', 'shoulder_bottom_right'])
+            gamepad.off(['press', 'release'], ['d_pad_left', 'd_pad_right', 'd_pad_up', 'd_pad_down'])
         };
         addEvent(this.boardCover, "focus", setListeners);
         addEvent(this.boardCover, "blur", unsetListeners);
+
     }
 
     playRecord() {
@@ -1108,7 +1247,7 @@ class Game {
             this.piece.addMove(0);
             this.updateQueue();
         }
-        
+
         if (!this.gameOver) {
             this.piece.display();
             this.gravTimer = new GravityTimer(this);
@@ -1121,7 +1260,7 @@ class Game {
             // while(this.listeners.length != 0) {
             //     document.removeEventListener("keydown", this.listeners.splice(0,1)[0]);
             // }
-            
+
             this.gameOver = false;
             this.resetGame();
             this.playPiece();
@@ -1144,7 +1283,7 @@ class Game {
                 }
             }
         }
-        
+
         this.bag = [];
         this.piece = null;
         this.heldPiece = null;
@@ -1208,6 +1347,7 @@ class Game {
             error("Invalid piece: " + piece);
         }
 
+      has180 = false;
         var guide = {
             i: [
                 [
@@ -1354,7 +1494,7 @@ class Game {
             }
             return;
         }
-            
+
         for (var i = 0; i < this.realHeldPieces.length; i++) {
             var p = this.realHeldPieces[i];
             if (p.classList.length == 0)
@@ -1364,7 +1504,7 @@ class Game {
             p.style.top = (this.heldLocations[this.heldPiece.piece][i][0]) + "%";
             p.style.left = (this.heldLocations[this.heldPiece.piece][i][1]) + "%";
         }
-        
+
     }
 
     static repeatKeys(action, bool, speed) {
@@ -1419,7 +1559,7 @@ class Game {
     // sets the displayed screen to match the virtual board
     updateScreen() {
         var start = this.board.tiles.length - this.settings.displayedBoardHeight;
-        
+
         var tempBoard = [];
         for (var r = 0; r < 40; r++) {
             tempBoard.push([]);
@@ -1445,7 +1585,7 @@ class Game {
                 removedRows.push(row);
             }
         }
-            
+
         this.piece.linesCleared = removedRows.length;
         // TODO add this to constructor of piece object
         if (removedRows.length != 0)
@@ -1535,10 +1675,10 @@ class Game {
         e.target.addEventListener("keydown", function(e) {
             e = e || window.event;
             var keyCode = e.keyCode;
-            
+
             var board = games[Game.getGameNumber(e.target.id)];
             board.settings.addKeyCode(e.target.parentNode.children[1].innerHTML.toLowerCase(), keyCode);
-            
+
             e.target.style.background = "none";
             var ele = e.target.cloneNode(true);
             e.target.parentNode.replaceChild(ele, e.target);
@@ -1657,7 +1797,7 @@ class Stats {
             b.stats.executeStatsListeners("tick");
         });
 
-        
+
         // object that stores listeners. labels array stores names of all function arrays (every "element" in statsListeners is an array of functions)
         this.statsListeners = {
             labels: []
@@ -1875,7 +2015,7 @@ class PageStat {
 
     updateValue(value) {
         this.value = value
-        
+
         if (this.linked != null)
             for (var i = 0; i < this.linked.length; i++)
                 this.linked[i].updateValue(value);
@@ -1945,7 +2085,7 @@ class Clock {
 
         this.storedTime = -1;
         this.pausedTime = -1;
-        
+
         if (!this.board.paused)
             this.resume();
     }
@@ -2026,7 +2166,7 @@ class GravityTimer {
 
     resume() {
         this.start = new Date().getTime();
-        
+
         var f = function(board) {
             if (board.gravNum == 0)
                 return;
@@ -2034,9 +2174,9 @@ class GravityTimer {
                 board.gravNum--;
             if (board.gravNum != 0)
                 return;
-            
+
             board.piece.drop();
-            
+
             if (board.gravTimer != null)
                 board.gravTimer = new GravityTimer(board);
         }
@@ -2075,7 +2215,7 @@ class Piece {
         rot2.push([[0,0], [1,0], [-2,0], [1,-2], [-2,1]]); // 3>>0
         var rotationChart = {"i": rot2, "j": rot1, "l": rot1, "o": rot1, "s": rot1, "t": rot1, "z": rot1};
         this.rotationChart = rotationChart[piece];
-        
+
         var i = [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]];
         var j = [[1,0,0],[1,1,1],[0,0,0]];
         var l = [[0,0,1],[1,1,1],[0,0,0]];
@@ -2097,11 +2237,11 @@ class Piece {
             spawnLoc[this.piece][0]--;
         return spawnLoc[this.piece];
     }
-    
+
     getPiece() {
         return this.piece;
     }
-    
+
     getRotation() {
         return this.rotation
     }
@@ -2160,7 +2300,7 @@ class Piece {
             this.board.playPiece();
         }
     }
-    
+
     // erase piece from board
     clear() {
         if (this.isDropped)
@@ -2184,7 +2324,7 @@ class Piece {
         }
         this.clearShadow();
     }
-    
+
     hold() {
         this.addMove(7);
         this.clear();
@@ -2349,7 +2489,7 @@ class Piece {
         }
         this.display();
     }
-    
+
     // tests if there are any conflicts at location (2 element array) and arr (piece layout array)
     isValidPosition(loc, arr) {
         // remove own piece from the virtual board before checking
@@ -2364,7 +2504,7 @@ class Piece {
                     // if the tile is off the edge
                     if (curRow >= this.board.board.tiles.length || curCol >= this.board.board.tiles[0].length || curRow < 0 || curCol < 0)
                         return false;
-                    
+
                     // check if the tile is empty
                     if (this.board.board.tiles[curRow][curCol].p !== "")
                         return false;
@@ -2374,14 +2514,14 @@ class Piece {
 
         return true;
     }
-    
+
     // rotates the array clockwise, array must be square. Direction is 1 for cw, -1 for ccw
     static rotateArr(arr, direction) {
         if (arr.length != arr[0].length) {
             error("Error: array must be 2d and square but was " + arr);
             return;
         }
-        
+
         var newArr = [];
         for (var row = 0; row < arr.length; row++) {
             var temp = [];

@@ -2,6 +2,7 @@
 
 <head>
     <title>Tetresse</title>
+    <script src="scripts/gamepad.js"></script>
     <script src="scripts/game.js"></script>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/basic page.css">
@@ -75,7 +76,7 @@
             element.innerHTML = "-";
             document.getElementById("keybinds-submit").style.background = "#c4c4c4";
             var setKey = function(e) {
-                e = e || window.event;    
+                e = e || window.event;
                 var ele = document.getElementById("keybinds-entry");
                 if (e != null) {
                     ele.innerHTML = e.keyCode + "";
