@@ -1713,20 +1713,27 @@ class Game {
             boolShadowPiece: true,
             numNextPieces: 5,
             keyCodes: {
-                39: "right",
-                37: "left",
-                38: "cw",
-                90: "ccw",
-                40: "sd",
-                32: "hd",
-                67: "hold",
-                16: "hold",
-                87: "hold",
-                69: "ccw",
-                82: "cw",
-                74: "left",
-                75: "sd",
-                76: "right",
+                84: 'left', // Left
+                89: 'right', // Right
+                71: 'sd', // SD
+                72: 'hd', // HD
+                85: 'ccw', // CCW
+                73: 'cw', // CW
+                79: 'hold', // Hold
+                // 39: "right",
+                // 37: "left",
+                // 38: "cw",
+                // 90: "ccw",
+                // 40: "sd",
+                // 32: "hd",
+                // 67: "hold",
+                // 16: "hold",
+                // 87: "hold",
+                // 69: "ccw",
+                // 82: "cw",
+                // 74: "left",
+                // 75: "sd",
+                // 76: "right",
             },
             loadFile: [],
             optionsBarVisible: true,
